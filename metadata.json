@@ -1,0 +1,6 @@
+{
+  "name": "FoodClass - Generador de Menús Semanales",
+  "description": "Diseñador y creador de menús semanales escolares, nutricionales y de catering con plantillas modernas y personalizables.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
