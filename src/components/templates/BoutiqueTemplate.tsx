@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 import { Utensils, Star } from 'lucide-react';
 
@@ -125,9 +126,16 @@ export const BoutiqueTemplate: React.FC<TemplateProps> = ({ menu, onEditCell }) 
         <div className="text-center pt-2 font-serif text-amber-950 space-y-2">
           <p className="italic text-base sm:text-lg">"{footer.slogan || 'El arte de comer bien cada día.'}"</p>
           {footer.whatsappContact && (
-            <p className="text-xs font-sans tracking-wider text-amber-900 font-semibold">
+            <a
+              href={getWhatsAppUrl(footer.whatsappContact)}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-whatsapp-link="true"
+              className="inline-block text-xs font-sans tracking-wider text-amber-900 font-semibold hover:text-amber-700 hover:underline transition-colors"
+              title="Abrir chat en WhatsApp"
+            >
               INFORMES Y PEDIDOS | WHATSAPP: {footer.whatsappContact}
-            </p>
+            </a>
           )}
         </div>
       </div>

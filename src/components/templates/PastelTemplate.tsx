@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 import { Smile, Sun, Heart } from 'lucide-react';
 
@@ -135,9 +136,16 @@ export const PastelTemplate: React.FC<TemplateProps> = ({ menu, onEditCell }) =>
           "{footer.slogan || '¡Creciendo sanos, felices y con mucha energía!'}"
         </p>
         {footer.whatsappContact && (
-          <div className="inline-block bg-pink-500 text-white font-black px-4 py-1.5 rounded-full text-xs shadow-md">
+          <a
+            href={getWhatsAppUrl(footer.whatsappContact)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-whatsapp-link="true"
+            className="inline-block bg-pink-500 hover:bg-pink-600 text-white font-black px-4 py-1.5 rounded-full text-xs shadow-md transition-colors"
+            title="Abrir chat en WhatsApp"
+          >
             Atención WhatsApp: {footer.whatsappContact}
-          </div>
+          </a>
         )}
       </div>
     </div>

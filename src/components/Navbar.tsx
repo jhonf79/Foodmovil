@@ -79,26 +79,60 @@ export const Navbar: React.FC<NavbarProps> = ({
     return `MENU-DEL-10-AL-14-DE-AGOSTO-2026.${ext}`;
   };
 
-  // Direct PDF Download using html-to-image + jsPDF with Blob URL
-  const handleExportPdf = async () => {
-    const el = document.getElementById('menu-printable-area');
-    if (!el) {
-      alert('No se encontró el área del menú para exportar.');
-      return;
-    }
+  // Helper to ensure all <img> elements (especially large/preset logos on mobile) are decoded and inlined before capture
+  const captureMenuAsPng = async (el: HTMLElement): Promise<string> => {
+    const imgs = Array.from(el.querySelectorAll('img'));
+    const originalSrcs: Array<{ img: HTMLImageElement; src: string }> = [];
 
     try {
-      setIsExportingPdf(true);
+      await Promise.all(
+        imgs.map(async (img) => {
+          if (!img.complete) {
+            await new Promise<void>((resolve) => {
+              const done = () => resolve();
+              img.addEventListener('load', done, { once: true });
+              img.addEventListener('error', done, { once: true });
+            });
+          }
 
-      // Force complete unclipped capture width and height
+          if (typeof img.decode === 'function') {
+            await img.decode().catch(() => {});
+          }
+
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            try {
+              const maxDim = 512;
+              const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+              const targetW = Math.max(1, Math.round(img.naturalWidth * scale));
+              const targetH = Math.max(1, Math.round(img.naturalHeight * scale));
+
+              const canvas = document.createElement('canvas');
+              canvas.width = targetW;
+              canvas.height = targetH;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, targetW, targetH);
+                const inlinedDataUrl = canvas.toDataURL('image/png');
+                originalSrcs.push({ img, src: img.src });
+                img.src = inlinedDataUrl;
+                if (typeof img.decode === 'function') {
+                  await img.decode().catch(() => {});
+                }
+              }
+            } catch {
+              // Ignore tainted canvas errors for cross-origin images
+            }
+          }
+        })
+      );
+
       const captureWidth = Math.max(el.scrollWidth, el.offsetWidth, 960);
       const captureHeight = Math.max(el.scrollHeight, el.offsetHeight);
 
-      const dataUrl = await toPng(el, {
+      return await toPng(el, {
         quality: 0.98,
         pixelRatio: 2,
         backgroundColor: '#ffffff',
-        cacheBust: true,
         width: captureWidth,
         height: captureHeight,
         style: {
@@ -110,6 +144,42 @@ export const Navbar: React.FC<NavbarProps> = ({
           overflow: 'visible',
         },
       });
+    } finally {
+      for (const { img, src } of originalSrcs) {
+        img.src = src;
+      }
+    }
+  };
+
+  // Direct PDF Download using html-to-image + jsPDF with Blob URL
+  const handleExportPdf = async () => {
+    const el = document.getElementById('menu-printable-area');
+    if (!el) {
+      alert('No se encontró el área del menú para exportar.');
+      return;
+    }
+
+    try {
+      setIsExportingPdf(true);
+
+      // Measure WhatsApp link position relative to the printable container before capture
+      const whatsappLinkEl = el.querySelector('[data-whatsapp-link="true"]') as HTMLAnchorElement | null;
+      let whatsappLinkRatio: { relX: number; relY: number; relW: number; relH: number; url: string } | null = null;
+      if (whatsappLinkEl && whatsappLinkEl.href) {
+        const elRect = el.getBoundingClientRect();
+        const linkRect = whatsappLinkEl.getBoundingClientRect();
+        if (elRect.width > 0 && elRect.height > 0) {
+          whatsappLinkRatio = {
+            relX: (linkRect.left - elRect.left) / elRect.width,
+            relY: (linkRect.top - elRect.top) / elRect.height,
+            relW: linkRect.width / elRect.width,
+            relH: linkRect.height / elRect.height,
+            url: whatsappLinkEl.href,
+          };
+        }
+      }
+
+      const dataUrl = await captureMenuAsPng(el);
 
       // Load image dimensions
       const img = new Image();
@@ -150,6 +220,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       pdf.addImage(dataUrl, 'PNG', x, y, renderWidth, renderHeight);
 
+      if (whatsappLinkRatio) {
+        pdf.link(
+          x + whatsappLinkRatio.relX * renderWidth,
+          y + whatsappLinkRatio.relY * renderHeight,
+          whatsappLinkRatio.relW * renderWidth,
+          whatsappLinkRatio.relH * renderHeight,
+          { url: whatsappLinkRatio.url }
+        );
+      }
+
       const fileName = generateFormattedFileName('pdf');
 
       // Generate Blob URL for maximum browser compatibility
@@ -185,25 +265,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     try {
       setIsExportingPng(true);
 
-      const captureWidth = Math.max(el.scrollWidth, el.offsetWidth, 960);
-      const captureHeight = Math.max(el.scrollHeight, el.offsetHeight);
-
-      const dataUrl = await toPng(el, {
-        quality: 0.98,
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-        width: captureWidth,
-        height: captureHeight,
-        style: {
-          transform: 'none',
-          width: `${captureWidth}px`,
-          minWidth: `${captureWidth}px`,
-          maxWidth: 'none',
-          margin: '0 auto',
-          overflow: 'visible',
-        },
-      });
+      const dataUrl = await captureMenuAsPng(el);
 
       const fileName = generateFormattedFileName('png');
 

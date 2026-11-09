@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 import { Leaf, ShieldCheck, HeartPulse, Check } from 'lucide-react';
 
@@ -145,9 +146,16 @@ export const HealthyTemplate: React.FC<TemplateProps> = ({ menu, onEditCell }) =
         </div>
 
         {footer.whatsappContact && (
-          <div className="bg-emerald-600 text-white font-extrabold px-3.5 py-1.5 rounded-xl shadow-sm text-xs">
+          <a
+            href={getWhatsAppUrl(footer.whatsappContact)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-whatsapp-link="true"
+            className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3.5 py-1.5 rounded-xl shadow-sm text-xs transition-colors"
+            title="Abrir chat en WhatsApp"
+          >
             Contacto WhatsApp: {footer.whatsappContact}
-          </div>
+          </a>
         )}
       </div>
     </div>

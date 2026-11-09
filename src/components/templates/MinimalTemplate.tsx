@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 import { Phone, Globe, CheckCircle2 } from 'lucide-react';
 
@@ -135,9 +136,16 @@ export const MinimalTemplate: React.FC<TemplateProps> = ({ menu, onEditCell }) =
 
         <div className="flex items-center gap-4 font-mono text-[11px]">
           {footer.whatsappContact && (
-            <span className="flex items-center gap-1">
+            <a
+              href={getWhatsAppUrl(footer.whatsappContact)}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-whatsapp-link="true"
+              className="flex items-center gap-1 hover:text-emerald-700 hover:underline transition-colors"
+              title="Abrir chat en WhatsApp"
+            >
               <strong>Contacto:</strong> {footer.whatsappContact}
-            </span>
+            </a>
           )}
           {footer.emailOrWeb && <span>{footer.emailOrWeb}</span>}
         </div>

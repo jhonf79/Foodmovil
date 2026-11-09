@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 
 interface TemplateProps {
@@ -107,7 +108,18 @@ export const GridExecutiveTemplate: React.FC<TemplateProps> = ({ menu, onEditCel
       {/* Footer */}
       <div className="flex items-center justify-between text-xs font-semibold border-t-2 border-slate-900 pt-3 text-slate-800">
         <p>"{footer.slogan || 'Alimentación institucional certificada'}"</p>
-        {footer.whatsappContact && <p>WhatsApp: {footer.whatsappContact}</p>}
+        {footer.whatsappContact && (
+          <a
+            href={getWhatsAppUrl(footer.whatsappContact)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-whatsapp-link="true"
+            className="hover:text-emerald-700 hover:underline transition-colors"
+            title="Abrir chat en WhatsApp"
+          >
+            WhatsApp: {footer.whatsappContact}
+          </a>
+        )}
       </div>
     </div>
   );

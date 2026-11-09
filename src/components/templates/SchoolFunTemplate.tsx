@@ -1,6 +1,7 @@
 import React from 'react';
 import { WeeklyMenu } from '../../types';
 import { LogoRenderer } from '../LogoRenderer';
+import { getWhatsAppUrl } from '../../utils/whatsapp';
 import { FOOD_TAGS } from '../../data/defaultData';
 import { Phone, MessageSquare, Sparkles } from 'lucide-react';
 
@@ -181,10 +182,17 @@ export const SchoolFunTemplate: React.FC<TemplateProps> = ({ menu, onEditCell })
 
         {/* Contact info & WhatsApp */}
         {footer.whatsappContact && (
-          <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-4 py-1.5 rounded-full shadow font-extrabold text-xs sm:text-sm tracking-wide">
+          <a
+            href={getWhatsAppUrl(footer.whatsappContact)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-whatsapp-link="true"
+            className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-full shadow font-extrabold text-xs sm:text-sm tracking-wide transition-colors"
+            title="Abrir chat en WhatsApp"
+          >
             <MessageSquare size={16} />
             <span>WhatsApp: {footer.whatsappContact}</span>
-          </div>
+          </a>
         )}
 
         {footer.emailOrWeb && (
